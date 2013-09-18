@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+# check_7mode_disk
+# usage: ./check_7mode_disk hostname username password
+# Alexander Krogloth <git at krogloth.de>
+
 use lib "/usr/lib/netapp-manageability-sdk-5.1/lib/perl/NetApp";
 use NaServer;
 use NaElement;

@@ -1,11 +1,14 @@
 #!/usr/bin/perl
 
+# check_7mode_snapshot_age
+# usage: ./check_7mode_snapshot_age hostname username password
+# Alexander Krogloth <git at krogloth.de>
+
 use lib "/usr/lib/netapp-manageability-sdk-5.1/lib/perl/NetApp";
 use NaServer;
 use NaElement;
 use strict;
 use warnings;
-use Data::Dumper;
 
 my $maxtime = 90*24*3600; # 7776000 (90 days)
 my $sched_maxtime;
