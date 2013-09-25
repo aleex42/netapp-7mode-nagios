@@ -1,20 +1,42 @@
 #!/usr/bin/perl
 
-# check_7mode_disk
-# usage: ./check_7mode_disk hostname username password
-# Alexander Krogloth <git at krogloth.de>
+# --
+# check_7mode_sparedisk.pl - Check NetApp System Spare Disks State
+# Copyright (C) 2013 noris network AG, http://www.noris.net/
+# --
+# This software comes with ABSOLUTELY NO WARRANTY. For details, see
+# the enclosed file COPYING for license information (GPL). If you
+# did not receive this file, see http://www.gnu.org/licenses/gpl.txt.
+# --
+
+use strict;
+use warnings;
 
 use lib "/usr/lib/netapp-manageability-sdk-5.1/lib/perl/NetApp";
 use NaServer;
 use NaElement;
-use strict;
-use warnings;
+use Getopt::Long;
 
-my $s = NaServer->new ($ARGV[0], 1, 3);
+GetOptions(
+    'hostname=s' => \my $Hostname,
+    'username=s' => \my $Username,
+    'password=s' => \my $Password,
+    'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
+) or Error("$0: Error in command line arguments\n");
+
+sub Error {
+    print "$0: " . shift;
+    exit 2;
+}
+Error('Option --hostname needed!') unless $Hostname;
+Error('Option --username needed!') unless $Username;
+Error('Option --password needed!') unless $Password;
+
+my $s = NaServer->new ($Hostname, 1, 3);
 
 $s->set_transport_type("HTTPS");
 $s->set_style("LOGIN");
-$s->set_admin_user($ARGV[1], $ARGV[2]);
+$s->set_admin_user($Username, $Password);
 $s->set_timeout(60);
 
 my $output = $s->invoke("disk-list-info");
