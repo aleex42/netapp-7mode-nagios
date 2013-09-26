@@ -42,9 +42,9 @@ $s->set_timeout(60);
 my $output = $s->invoke("disk-list-info");
 
 if ($output->results_errno != 0) {
-  my $r = $output->results_reason();
-  print "UNKNOWN - Timeout: $r\n";
-  exit 3;
+    my $r = $output->results_reason();
+    print "UNKNOWN - Timeout: $r\n";
+    exit 3;
 }
 
 my $normal = 0;
@@ -55,26 +55,26 @@ my @result = $disks->children_get();
 
 foreach my $disk (@result){
 
-  my $disk_state = $disk->child_get_string("raid-state");
+    my $disk_state = $disk->child_get_string("raid-state");
 
-  if($disk_state eq "spare"){
+    if($disk_state eq "spare"){
 
-    my $zero_state = $disk->child_get_string("is-zeroed");
+        my $zero_state = $disk->child_get_string("is-zeroed");
 
-    if($zero_state eq "false"){
-      $notzero++;
-    } else {
-      $normal++;
+        if($zero_state eq "false"){
+            $notzero++;
+        } else {
+            $normal++;
+        }
     }
-  }
 }
 
 if($notzero > 0){
-        print "WARNING: $notzero spares not zeroed - $normal normal spares\n";
-        exit 1;
+    print "WARNING: $notzero spares not zeroed - $normal normal spares\n";
+    exit 1;
 } else {
-        print "OK: $normal normal spares \n";
-        exit 0;
+    print "OK: $normal normal spares \n";
+    exit 0;
 }
 
 __END__

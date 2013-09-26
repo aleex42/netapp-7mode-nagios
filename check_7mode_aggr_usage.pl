@@ -54,37 +54,37 @@ my $message;
 
 foreach my $aggr (@result){
 
-	my $aggr_name = $aggr->child_get_string("aggregate-name");
-	my $aggr_alloc = $aggr->child_get_int("size-volume-allocated");
-	my $aggr_free = $aggr->child_get_string("size-free");
-	my $aggr_used = $aggr->child_get_string("size-volume-used");
+    my $aggr_name = $aggr->child_get_string("aggregate-name");
+    my $aggr_alloc = $aggr->child_get_int("size-volume-allocated");
+    my $aggr_free = $aggr->child_get_string("size-free");
+    my $aggr_used = $aggr->child_get_string("size-volume-used");
 
-	my $size = $aggr_alloc+$aggr_free;
-	my $percent = $aggr_used/$size*100;
-        my $percent_rounded = sprintf("%.2f", $percent);
+    my $size = $aggr_alloc+$aggr_free;
+    my $percent = $aggr_used/$size*100;
+    my $percent_rounded = sprintf("%.2f", $percent);
 
-	if($percent>=$Critical){
-		$critical_aggrs++;
-	} elsif ($percent>=$Warning){
-		$warning_aggrs++;
-	} 
+    if($percent>=$Critical){
+        $critical_aggrs++;
+    } elsif ($percent>=$Warning){
+        $warning_aggrs++;
+    } 
 
-	if($message){
-        	$message .= ", " . $aggr_name . " (" . $percent_rounded . "%)";
-	} else {
-		$message .= $aggr_name . " (" . $percent_rounded . "%)";
-	}
+    if($message){
+        $message .= ", " . $aggr_name . " (" . $percent_rounded . "%)";
+    } else {
+        $message .= $aggr_name . " (" . $percent_rounded . "%)";
+    }
 }
 
 if($critical_aggrs > 0){
-        print "CRITICAL: " . $message . "\n";
-        exit 2;
+    print "CRITICAL: " . $message . "\n";
+    exit 2;
 } elsif($warning_aggrs >0){
-	print "WARNING: " . $message . "\n";
-	exit 1;
+    print "WARNING: " . $message . "\n";
+    exit 1;
 } else {
-        print "OK: " . $message . "\n";
-        exit 0;
+    print "OK: " . $message . "\n";
+    exit 0;
 }
 
 __END__

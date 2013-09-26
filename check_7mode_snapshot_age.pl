@@ -50,79 +50,79 @@ my @vol_result = $volumes->children_get();
 
 foreach my $vol (@vol_result){
 
-        my $vol_name = $vol->child_get_string("name");
+    my $vol_name = $vol->child_get_string("name");
 
-        my $sched_api = new NaElement('snapshot-get-schedule');
-        $sched_api->child_add_string('volume',$vol_name);
-        my $sched_output = $s->invoke_elem($sched_api);
+    my $sched_api = new NaElement('snapshot-get-schedule');
+    $sched_api->child_add_string('volume',$vol_name);
+    my $sched_output = $s->invoke_elem($sched_api);
 
-        my $nightly_sched;
-        my $weekly_sched;
+    my $nightly_sched;
+    my $weekly_sched;
 
-        if($sched_output->child_get_string("days") && $sched_output->child_get_string("weeks")){
+    if($sched_output->child_get_string("days") && $sched_output->child_get_string("weeks")){
 
-                $nightly_sched = $sched_output->child_get_string("days");
-                $weekly_sched = $sched_output->child_get_string("weeks");
+        $nightly_sched = $sched_output->child_get_string("days");
+        $weekly_sched = $sched_output->child_get_string("weeks");
 
-                if($nightly_sched != 0){
-                        $sched_maxtime = $nightly_sched*24*3600;
-                }
-                if($weekly_sched != 0){
-                        $sched_maxtime = $weekly_sched*7*24*3600;
-                }
-
-        } else {
-                $sched_maxtime = $maxtime;
+        if($nightly_sched != 0){
+            $sched_maxtime = $nightly_sched*24*3600;
+        }
+        if($weekly_sched != 0){
+            $sched_maxtime = $weekly_sched*7*24*3600;
         }
 
-        my $api = new NaElement('snapshot-list-info');
-        $api->child_add_string('volume',$vol_name);
-        my $snapshot_output = $s->invoke_elem($api);
+    } else {
+        $sched_maxtime = $maxtime;
+    }
 
-        my $snapshots = $snapshot_output->child_get("snapshots");
+    my $api = new NaElement('snapshot-list-info');
+    $api->child_add_string('volume',$vol_name);
+    my $snapshot_output = $s->invoke_elem($api);
 
-        if($snapshots){
+    my $snapshots = $snapshot_output->child_get("snapshots");
 
-                my @snap_result = $snapshots->children_get();
+    if($snapshots){
 
-                foreach my $snapshot (@snap_result){
+        my @snap_result = $snapshots->children_get();
 
-                        my $snap_name = $snapshot->child_get_string("name");
-                        my $snap_time = $snapshot->child_get_string("access-time");
-                        my $age = $now - $snap_time;
+        foreach my $snapshot (@snap_result){
 
-                        if($snap_name =~ m/^(hourly|nightly|weekly)\./){
-                          if($vol_name !~ m/^snapmirror/){
-                                if($age > $sched_maxtime){
-                                        $old++;
-                                        if($old_snapshots){
-                                                $old_snapshots .= ", $vol_name/$snap_name";
-                                        } else {
-                                                $old_snapshots = "$vol_name/$snap_name";
-                                        }
-                                }
-                          }
+            my $snap_name = $snapshot->child_get_string("name");
+            my $snap_time = $snapshot->child_get_string("access-time");
+            my $age = $now - $snap_time;
+
+            if($snap_name =~ m/^(hourly|nightly|weekly)\./){
+                if($vol_name !~ m/^snapmirror/){
+                    if($age > $sched_maxtime){
+                        $old++;
+                        if($old_snapshots){
+                            $old_snapshots .= ", $vol_name/$snap_name";
                         } else {
-                                if($age >$maxtime){
-                                        $old++;
-                                        if($old_snapshots){
-                                                $old_snapshots .= ", $vol_name/$snap_name";
-                                        } else {
-                                                $old_snapshots = "$vol_name/$snap_name";
-                                        }
-                                }
+                            $old_snapshots = "$vol_name/$snap_name";
                         }
+                    }
                 }
+            } else {
+                if($age >$maxtime){
+                    $old++;
+                    if($old_snapshots){
+                        $old_snapshots .= ", $vol_name/$snap_name";
+                    } else {
+                        $old_snapshots = "$vol_name/$snap_name";
+                    }
+                }
+            }
         }
+    }
 }
 
 if($old ne "0"){
-        print "$old dead snapshot(s) older than 90 days:\n";
-        print "$old_snapshots\n";
-        exit 1;
+    print "$old dead snapshot(s) older than 90 days:\n";
+    print "$old_snapshots\n";
+    exit 1;
 } else {
-        print "No dead snapshots older than 90 days\n";
-        exit 0;
+    print "No dead snapshots older than 90 days\n";
+    exit 0;
 }
 
 __END__
