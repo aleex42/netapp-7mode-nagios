@@ -46,81 +46,73 @@ $s->set_timeout(60);
 
 my $output = $s->invoke("disk-list-info");
 
-if ($output->results_errno != 0) {
-  my $r = $output->results_reason();
-  print "UNKNOWN - Timeout: $r\n";
-  exit 3;
-}
-
 walk_all_children($output);
 
 my $filename = "/etc/config/lists/netapp_multipath/" . $Hostname;
 
 if (-e "$filename"){
-  open(FH, "$filename");
-  @file = <FH>;
-  close(FH);
+    open(FH, "$filename");
+    @file = <FH>;
+    close(FH);
 }
 
 my $index = 0;
 
 foreach my $disk (@prim_paths){
 
-  my $prim_path = 0;
-  my $sec_path = 0;
+    my $prim_path = 0;
+    my $sec_path = 0;
 
-  if($disk ne "none"){ $prim_path = 1; }
-  if($sec_paths[$index] ne "none"){ $sec_path = 1; }
+    if($disk ne "none"){ $prim_path = 1; }
+    if($sec_paths[$index] ne "none"){ $sec_path = 1; }
 
-  if($prim_path != "1"){
-    unless(grep( /$sec_paths[$index]/, @file )){
-      push @broken_disk_paths, $sec_paths[$index];
+    if($prim_path != "1"){
+        unless(grep( /$sec_paths[$index]/, @file )){
+            push @broken_disk_paths, $sec_paths[$index];
+        }
     }
-  }
 
-  if($sec_path != "1"){
-    unless(grep( /$disk/, @file )){
-      push @broken_disk_paths, $disk;
+    if($sec_path != "1"){
+        unless(grep( /$disk/, @file )){
+            push @broken_disk_paths, $disk;
+        }
     }
-  }
 
-  $index++;
+    $index++;
 
 }
 
 if(@broken_disk_paths){
-  print "Not All Disk Multipath: ";
-  foreach (@broken_disk_paths) {
-    print $_ . " ";
-  }
-  exit 2;
+    print "Not All Disk Multipath: ";
+    foreach (@broken_disk_paths) {
+        print $_ . " ";
+    }
+    exit 2;
 } else {
-  print "OK - All Disk Multipath\n";
-  exit 0;
+    print "OK - All Disk Multipath\n";
+    exit 0;
 }
 
 sub walk_all_children {
-	my $obj = shift;
-
-	if ($obj->children_get) {
-   	walk_all_children($_) for $obj->children_get;
-	} else {
-		if ($obj->{name} eq "name"){
-			unless($obj->{content}){
-        		push @prim_paths, "none";
-      	} else {
-				push @prim_paths, $obj->{content};
-      	}
-		}
-
-		if ($obj->{name} eq "secondary-name"){
-      	unless($obj->{content}){
-         	push @sec_paths, "none";
-			} else {
-         	push @sec_paths, $obj->{content};
-			}
-		}
-  }
+    my $obj = shift;
+    if ($obj->children_get) {
+        walk_all_children($_) for $obj->children_get;
+    } else {
+        if ($obj->{name} eq "name"){
+            unless($obj->{content}){
+                push @prim_paths, "none";
+            } else {
+                push @prim_paths, $obj->{content};
+            }
+        }
+        if ($obj->{name} eq "secondary-name"){
+            unless($obj->{content}){
+                push @sec_paths, "none";
+            } else {
+                push @sec_paths, $obj->{content};
+            }
+        }
+    }
 }
 
 __END__
