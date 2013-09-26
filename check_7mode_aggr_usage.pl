@@ -87,3 +87,63 @@ if($critical_aggrs > 0){
         exit 0;
 }
 
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+check_7mode_aggr_usage.pl - Nagios Plugin - Check NetApp 7-Mode Aggregate Space Usage
+
+=head1 SYNOPSIS
+
+check_7mode_aggr_usage.pl --hostname HOSTNAME --username USERNAME \
+           --password PASSWORD --warning WARNING --critical CRITICAL
+
+=head1 DESCRIPTION
+
+Checks aggregate real allocated space usage for all filer's aggregates
+
+=head1 OPTIONS
+
+=over 4
+
+=item --hostname FQDN
+
+The Hostname of the NetApp 7-Mode filer to collect the data
+
+=item --username USERNAME
+
+The Login Username of the monitoring-User
+
+=item --password PASSWORD
+
+The Login Password of the monitoring-User
+
+=item --warning WARNING
+
+The Warning Threshold for Aggregate Usage
+
+=item --critical CRITICAL
+
+The Critical Threshold for Aggregate Usage
+
+=item -help
+
+=item -?
+
+to see this Documentation
+
+=back
+
+=head1 EXIT CODE
+
+2 if any aggregate is fuller than CRITICAL
+1 if any aggregate is fuller than WARNING
+0 if everything is ok
+
+=head1 AUTHORS
+
+ Alexander Krogloth <git at krogloth.de>
+
+

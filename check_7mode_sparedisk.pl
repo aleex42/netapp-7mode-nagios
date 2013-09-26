@@ -76,3 +76,55 @@ if($notzero > 0){
         print "OK: $normal normal spares \n";
         exit 0;
 }
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+check_7mode_sparedisk.pl - Nagios Plugin - Check NetApp 7-Mode Spare Disk 
+
+=head1 SYNOPSIS
+
+check_7mode_sparedisk.pl --hostname HOSTNAME --username USERNAME \
+           --password PASSWORD
+
+=head1 DESCRIPTION
+
+Checks if all spare disks are zeroed
+
+=head1 OPTIONS
+
+=over 4
+
+=item --hostname FQDN
+
+The Hostname of the NetApp 7-Mode filer to collect the data
+
+=item --username USERNAME
+
+The Login Username of the monitoring-User
+
+=item --password PASSWORD
+
+The Login Password of the monitoring-User
+
+=item -help
+
+=item -?
+
+to see this Documentation
+
+=back
+
+=head1 EXIT CODE
+
+1 if any spare disk is not zeroed
+0 if everything is ok
+
+=head1 AUTHORS
+
+ Alexander Krogloth <git at krogloth.de>
+
+
