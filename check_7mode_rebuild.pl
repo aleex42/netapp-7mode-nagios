@@ -95,23 +95,16 @@ __END__
 
 =head1 NAME
 
-check_7mode_multipath.pl - Nagios Plugin - Check NetApp 7-Mode Disk Multipath
+check_7mode_rebuild - Nagios Plugin - Check NetApp 7-Mode Aggregate Rebuild
 
 =head1 SYNOPSIS
 
-check_7mode_multipath.pl --hostname HOSTNAME --username USERNAME \
+check_7mode_rebuild.pl --hostname HOSTNAME --username USERNAME \
            --password PASSWORD
 
 =head1 DESCRIPTION
 
-Checks multipathing for all NetApp Disks
-
-It is also possible to specify some whitelists - for example you have an filer with internal SAS-disks.
-These disks are typically not multipathed if you haven't got a HA-pair.
-
-Just add these disks to your whitelist-file (/etc/config/lists/netapp_multipath/HOSTNAME) like this:
-
-"0a.00.21 0a.00.17 0a.00.13 0a.00.6 0a.00.4 0a.00.2 0a.00.22 0a.00.18 0a.00.8 0a.00.16 0a.00.12 0a.00.11 0a.00.15 0a.00.0 0a.00.9 0a.00.1 0a.00.3 0a.00.19 0a.00.10 0a.00.5 0a.00.20 0a.00.14 0a.00.23 0a.00.7"
+Checks running rebuilds for all NetApp aggregates
 
 =head1 OPTIONS
 
@@ -139,7 +132,8 @@ to see this Documentation
 
 =head1 EXIT CODE
 
-2 if any disk is not multipathed
+2 if two or more disks in the same aggregate are rebuilding
+1 if one disk is rebuilding
 0 if everything is ok
 
 =head1 AUTHORS
