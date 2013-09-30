@@ -40,6 +40,13 @@ $s->set_admin_user($Username, $Password);
 $s->set_timeout(60);
 
 my $output = $s->invoke("aggr-list-info");
+
+if ($output->results_errno != 0) {
+        my $r = $output->results_reason();
+        print "UNKNOWN: $r\n";
+        exit 3;
+}
+
 my $aggrs = $output->child_get("aggregates");
 my @result = $aggrs->children_get();
 
