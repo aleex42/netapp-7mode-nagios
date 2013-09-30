@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # --
-# check_7mode_multipath.pl - Check NetApp System Disk Multipath
+# check_7mode_rebuild.pl - Check NetApp System Rebuild
 # Copyright (C) 2013 noris network AG, http://www.noris.net/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
