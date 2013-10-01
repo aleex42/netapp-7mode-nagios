@@ -45,6 +45,13 @@ $s->set_style("LOGIN");
 $s->set_admin_user($Username, $Password);
 
 my $vol_output = $s->invoke("volume-list-info");
+
+if ($vol_output->results_errno != 0) {
+    my $r = $vol_output->results_reason();
+    print "UNKNOWN: $r\n";
+    exit 3;
+}
+
 my $volumes = $vol_output->child_get("volumes");
 my @vol_result = $volumes->children_get();
 
@@ -55,6 +62,12 @@ foreach my $vol (@vol_result){
     my $sched_api = new NaElement('snapshot-get-schedule');
     $sched_api->child_add_string('volume',$vol_name);
     my $sched_output = $s->invoke_elem($sched_api);
+
+    if ($sched_output->results_errno != 0) {
+        my $r = $sched_output->results_reason();
+        print "UNKNOWN: $r\n";
+        exit 3;
+    }
 
     my $nightly_sched;
     my $weekly_sched;
@@ -78,6 +91,12 @@ foreach my $vol (@vol_result){
     my $api = new NaElement('snapshot-list-info');
     $api->child_add_string('volume',$vol_name);
     my $snapshot_output = $s->invoke_elem($api);
+
+    if ($snapshot_output->results_errno != 0) {
+        my $r = $snapshot_output->results_reason();
+        print "UNKNOWN: $r\n";
+        exit 3;
+    }
 
     my $snapshots = $snapshot_output->child_get("snapshots");
 
@@ -168,6 +187,7 @@ to see this Documentation
 
 =head1 EXIT CODE
 
+3 if timeout occured
 1 if there are any snapshots older than 90 days
 0 if everything is ok
 

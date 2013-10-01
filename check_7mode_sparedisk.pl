@@ -43,7 +43,7 @@ my $output = $s->invoke("disk-list-info");
 
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();
-    print "UNKNOWN - Timeout: $r\n";
+    print "UNKNOWN: $r\n";
     exit 3;
 }
 
@@ -120,6 +120,7 @@ to see this Documentation
 
 =head1 EXIT CODE
 
+3 if timeout occured
 1 if any spare disk is not zeroed
 0 if everything is ok
 

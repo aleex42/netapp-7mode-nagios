@@ -42,9 +42,9 @@ $s->set_timeout(60);
 my $output = $s->invoke("aggr-list-info");
 
 if ($output->results_errno != 0) {
-        my $r = $output->results_reason();
-        print "UNKNOWN: $r\n";
-        exit 3;
+    my $r = $output->results_reason();
+    print "UNKNOWN: $r\n";
+    exit 3;
 }
 
 my $aggrs = $output->child_get("aggregates");
@@ -59,7 +59,14 @@ foreach my $aggr (@result){
     my $aggr_name = $aggr->child_get_string("name");
     my $disk_output = $s->invoke("disk-list-info");
 
+    if ($disk_output->results_errno != 0) {
+        my $r = $disk_output->results_reason();
+        print "UNKNOWN: $r\n";
+        exit 3;
+    }
+
     my $disks = $disk_output->child_get("disk-details");
+
     my @disk_result = $disks->children_get();
     my $reconstruct_count = 0;
 
@@ -139,6 +146,7 @@ to see this Documentation
 
 =head1 EXIT CODE
 
+3 if timeout occured
 2 if two or more disks in the same aggregate are rebuilding
 1 if one disk is rebuilding
 0 if everything is ok

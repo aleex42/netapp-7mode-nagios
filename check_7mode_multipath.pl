@@ -46,6 +46,12 @@ $s->set_timeout(60);
 
 my $output = $s->invoke("disk-list-info");
 
+if ($output->results_errno != 0) {
+    my $r = $output->results_reason();
+    print "UNKNOWN: $r\n";
+    exit 3;
+}
+
 walk_all_children($output);
 
 my $filename = "/etc/config/lists/netapp_multipath/" . $Hostname;
@@ -165,6 +171,7 @@ to see this Documentation
 
 =head1 EXIT CODE
 
+3 if timeout occured
 2 if any disk is not multipathed
 0 if everything is ok
 

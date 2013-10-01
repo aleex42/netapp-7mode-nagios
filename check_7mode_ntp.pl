@@ -42,6 +42,13 @@ $s->set_admin_user($Username, $Password);
 $s->set_timeout(60);
 
 my $output = $s->invoke("clock-get-clock");
+
+if ($output->results_errno != 0) {
+    my $r = $output->results_reason();
+    print "UNKNOWN: $r\n";
+    exit 3;
+}
+
 my $time_netapp = $output->child_get_string("local-time");
 
 my $time_now = time();
@@ -103,6 +110,7 @@ to see this Documentation
 
 =head1 EXIT CODE
 
+3 if timeout occured
 2 if NetApp time is more than DIFF seconds away from local system time
 0 if everything is ok
 
