@@ -1,21 +1,44 @@
 netapp-7mode-nagios
 ===================
 
-	About
-	-----
+About
+-----
 	
 	Scripts for monitoring NetApp 7-Mode-Systems via NetApp Perl-API
-	
 
-	Examples
-	--------
+Plugins
+-------
+
+    Currently there are the following checks:
+
+    * check_7mode_aggr_usage.pl
+      Checks Aggregate Space Usage
+
+    * check_7mode_multipath.pl
+      Checks Disk Multipathing
+
+    * check_7mode_ntp.pl
+      Checks NetApp System Time
+
+    * check_7mode_rebuild.pl
+      Checks for running RAID-Rebuilds
+
+    * check_7mode_snapshot_age.pl
+      Checks Snapshot Age
+
+    * check_7mode_sparedisk.pl	
+      Checks Spare Disk Healthiness
+
+
+Examples
+--------
 
 	For some examples have a look at my wiki:
 	http://wiki.krogloth.de/index.php/NetApp_7-Mode/Monitoring
 
 	
-	Contact / Author
-	----------------
+Contact / Author
+----------------
 	
 	Alexander Krogloth
 	<git at krogloth.de>
