@@ -68,7 +68,7 @@ foreach my $vol (@vol_result){
 
         if ($sched_output->results_errno != 0) {
             my $r = $sched_output->results_reason();
-            print "bla UNKNOWN: $r\n";
+            print "UNKNOWN: $r\n";
             exit 3;
         }
 
