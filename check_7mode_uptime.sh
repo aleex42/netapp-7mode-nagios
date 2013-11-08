@@ -16,8 +16,7 @@ MUST_UPTIME=$3
 UPTIME=$(/usr/bin/snmpwalk -v 2c -c $COMMUNITY $HOST .1.3.6.1.2.1.1.3.0 | awk -F \( '{ print $2 }' | awk -F \) '{ print $1 }')
  
 UPTIME_MINUTES=$(echo $UPTIME/6000 | bc)
-UPTIME_DAYS=$(echo $UPTIME_MINUTES/1440 | bc -l)
-ROUNDED_DAYS=$(printf %.1f $UPTIME_DAYS)
+ROUNDED_DAYS=$(echo "scale=2; $UPTIME_MINUTES/1440" | bc -l)
  
 if [ $UPTIME_MINUTES -lt $MUST_UPTIME ]; then
         echo "CRITICAL - Uptime only $UPTIME_MINUTES minutes"
