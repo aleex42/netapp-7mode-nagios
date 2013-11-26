@@ -60,7 +60,7 @@ foreach my $vol (@vol_result){
     my $vol_name = $vol->child_get_string("name");
     my $vol_state = $vol->child_get_string("state");
 
-    unless($vol_state eq "offline"){
+    unless(($vol_state eq "offline") || ($vol_state eq "unknown")){
 
         my $sched_api = new NaElement('snapshot-get-schedule');
         $sched_api->child_add_string('volume',$vol_name);
