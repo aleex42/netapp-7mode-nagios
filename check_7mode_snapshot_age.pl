@@ -118,9 +118,9 @@ foreach my $vol (@vol_result){
                         if($age > $sched_maxtime){
                             $old++;
                             if($old_snapshots){
-                                $old_snapshots .= ", $vol_name/$snap_name";
+                                $old_snapshots .= ", $vol_name/$snap_name (Age: $age)";
                             } else {
-                                $old_snapshots = "$vol_name/$snap_name";
+                                $old_snapshots = "$vol_name/$snap_name (Age: $age)";
                             }
                         }
                     }
@@ -128,9 +128,9 @@ foreach my $vol (@vol_result){
                     if($age >$maxtime){
                         $old++;
                         if($old_snapshots){
-                            $old_snapshots .= ", $vol_name/$snap_name";
+                            $old_snapshots .= ", $vol_name/$snap_name (Age: $age)";
                         } else {
-                            $old_snapshots = "$vol_name/$snap_name";
+                            $old_snapshots = "$vol_name/$snap_name (Age: $age";
                         }
                     }
                 }
