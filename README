@@ -29,6 +29,12 @@ Plugins
     * check_7mode_sparedisk.pl	
       Checks Spare Disk Healthiness
 
+    * check_7mode_snapmirror.pl
+      Checks SnapMirror Lag Time
+
+    * check_7mode_vol_usage.pl
+      Checks Volume Space Usage
+
 
 Examples
 --------
