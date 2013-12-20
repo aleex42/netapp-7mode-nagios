@@ -51,19 +51,22 @@ if ($snapmirror_output->results_errno != 0) {
 }
 
 my $snapmirror = $snapmirror_output->child_get("snapmirror-status");
-my @snapmirror_result = $snapmirror->children_get();
+if($snapmirror){
 
-foreach my $sm (@snapmirror_result){
+    my @snapmirror_result = $snapmirror->children_get();
 
-    my $dest_name = $sm->child_get_string("destination-location");
-    my $lag = $sm->child_get_int("lag-time");
-    
-    if($lag >= $maxtime){
-        $old++;
-        if($old_snapmirrors){
-            $old_snapmirrors .= ", $dest_name";
-        } else {
-            $old_snapmirrors = "$dest_name";
+    foreach my $sm (@snapmirror_result){
+
+        my $dest_name = $sm->child_get_string("destination-location");
+        my $lag = $sm->child_get_int("lag-time");
+
+        if($lag >= $maxtime){
+            $old++;
+            if($old_snapmirrors){
+                $old_snapmirrors .= ", $dest_name";
+            } else {
+                $old_snapmirrors = "$dest_name";
+            }
         }
     }
 }
