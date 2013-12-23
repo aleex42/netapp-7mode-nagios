@@ -80,11 +80,12 @@ foreach my $vol (@vol_result){
             $nightly_sched = $sched_output->child_get_string("days");
             $weekly_sched = $sched_output->child_get_string("weeks");
 
+            # +172800 (2 days) because the snapshot isn't deleted instant
             if($nightly_sched != 0){
-                $sched_maxtime = $nightly_sched*24*3600;
+                $sched_maxtime = ($nightly_sched*24*3600)+172800;
             }
             if($weekly_sched != 0){
-                $sched_maxtime = $weekly_sched*7*24*3600;
+                $sched_maxtime = ($weekly_sched*7*24*3600)+172800;
             }
 
         } else {
@@ -128,9 +129,9 @@ foreach my $vol (@vol_result){
                     if($age >$maxtime){
                         $old++;
                         if($old_snapshots){
-                            $old_snapshots .= ", $vol_name/$snap_name (Age: $age)";
+                            $old_snapshots .= ", $vol_name/$snap_name";
                         } else {
-                            $old_snapshots = "$vol_name/$snap_name (Age: $age";
+                            $old_snapshots = "$vol_name/$snap_name";
                         }
                     }
                 }
@@ -140,11 +141,11 @@ foreach my $vol (@vol_result){
 }
 
 if($old ne "0"){
-    print "$old dead snapshot(s) older than 90 days:\n";
+    print "$old dead snapshot(s) older than scheduled:\n";
     print "$old_snapshots\n";
     exit 1;
 } else {
-    print "No dead snapshots older than 90 days\n";
+    print "No dead snapshots older than scheduled\n";
     exit 0;
 }
 
