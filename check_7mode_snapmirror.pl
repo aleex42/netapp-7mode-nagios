@@ -21,6 +21,7 @@ GetOptions(
     'hostname=s' => \my $Hostname,
     'username=s' => \my $Username,
     'password=s' => \my $Password,
+    'lag=i'      => \my $LagOpt,
     'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
 ) or Error("$0: Error in command line arguments\n");
 
@@ -31,8 +32,8 @@ sub Error {
 Error('Option --hostname needed!') unless $Hostname;
 Error('Option --username needed!') unless $Username;
 Error('Option --password needed!') unless $Password;
+$LagOpt = 3600 * 28 unless $LagOpt; # 1 day 3 hours
 
-my $maxtime = 3600*24; # 1 day
 my $old = 0;
 my $old_snapmirrors;
 
@@ -60,7 +61,7 @@ if($snapmirror){
         my $dest_name = $sm->child_get_string("destination-location");
         my $lag = $sm->child_get_int("lag-time");
 
-        if($lag >= $maxtime){
+        if($lag >= $LagOpt){
             $old++;
             if($old_snapmirrors){
                 $old_snapmirrors .= ", $dest_name";
@@ -112,6 +113,10 @@ The Login Username of the monitoring-User
 =item --password PASSWORD
 
 The Login Password of the monitoring-User
+
+=item --lag DELAY-SECONDS
+
+Snapmirror delay in Seconds. Default 28h
 
 =item -help
 
