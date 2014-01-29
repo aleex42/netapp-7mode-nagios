@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # --
-# check_7mode_vol_usage.pl - Check NetApp System Volume Space Usage
+# check_7mode_volume.pl - Check NetApp System Volume Usage
 # Copyright (C) 2013 noris network AG, http://www.noris.net/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -22,8 +22,10 @@ GetOptions(
 	'username=s' => \my $Username,
 	'password=s' => \my $Password,
     'volume=s' => \my $Volume,
-	'warning=i' => \my $Warning,
-	'critical=i' => \my $Critical,	
+	'size-warning=i' => \my $Size_Warning,
+	'size-critical=i' => \my $Size_Critical,	
+    'inode-warning=i' => \my $Inode_Warning,
+    'inode-critical=i' => \my $Inode_Critical,
 	'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
 ) or Error("$0: Error in command line arguments\n");
 
@@ -35,8 +37,10 @@ Error('Option --hostname needed!') unless $Hostname;
 Error('Option --username needed!') unless $Username;
 Error('Option --password needed!') unless $Password;
 Error('Option --volume needed!') unless $Volume;
-Error('Option --warning needed!') unless $Warning;
-Error('Option --critical needed!') unless $Critical;
+Error('Option --size-warning needed!') unless $Size_Warning;
+Error('Option ---size-critical needed!') unless $Size_Critical;
+Error('Option --inode-warning needed!') unless $Inode_Warning;
+Error('Option ---inode-critical needed!') unless $Inode_Critical;
 
 my $s = NaServer->new ($Hostname, 1, 3);
 
@@ -58,16 +62,20 @@ my @result = $vols->children_get();
 
 foreach my $vol (@result){
 
+    my $inode_used = $vol->child_get_int("files-used");
+    my $inode_total = $vol->child_get_int("files-total");
+    my $inode_percent = sprintf("%.2f", $inode_used/$inode_total*100);
+
     my $used = $vol->child_get_int("percentage-used");
 
-    if($used>=$Critical){
-        print "CRITICAL: $Volume ($used%)\n";              
+    if(($used>=$Size_Critical) || ($inode_percent>=$Inode_Critical)){
+        print "CRITICAL: $Volume (Size: $used%, Inodes: $inode_percent%)\n";              
          exit 2;
-    } elsif ($used>=$Warning){
-        print "WARNING: $Volume ($used%)\n";
+    } elsif (($used>=$Size_Warning) || ($inode_percent>=$Inode_Warning)){
+        print "WARNING: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
         exit 1;
     } else {
-        print "OK: $Volume ($used%)\n";
+        print "OK: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
         exit 0;
     }
 }
@@ -79,12 +87,13 @@ __END__
 
 =head1 NAME
 
-check_7mode_vol_usage.pl - Nagios Plugin - Check NetApp 7-Mode Volume Space Usage
+check_7mode_vol_usage.pl - Nagios Plugin - Check NetApp 7-Mode Volume Usage
 
 =head1 SYNOPSIS
 
 check_7mode_aggr_usage.pl --hostname HOSTNAME --username USERNAME \
-           --password PASSWORD --warning WARNING --critical CRITICAL --volume VOLUME
+           --password PASSWORD --size-warning WARNING --size-critical CRITICAL --volume VOLUME \
+           --inode-warning WARNING --inode-critical WARNING
 
 =head1 DESCRIPTION
 
@@ -106,13 +115,21 @@ The Login Username of the monitoring-User
 
 The Login Password of the monitoring-User
 
-=item --warning WARNING
+=item --size-warning WARNING
 
-The Warning Threshold for Aggregate Usage
+The Warning Threshold for Volume Space Usage
 
-=item --critical CRITICAL
+=item --size-critical CRITICAL
 
-The Critical Threshold for Aggregate Usage
+The Critical Threshold for Volume Space Usage
+
+=item --inode-warning WARNING
+
+The Warning Threshold for Volume Inode Usage
+
+=item --inode-critical CRITICAL
+
+The Critical Threshold for Volume Inode Usage
 
 =item --volume VOLUME
 
