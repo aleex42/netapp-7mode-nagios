@@ -35,6 +35,9 @@ Plugins
     * check_7mode_vol_usage.pl
       Checks Volume Space Usage
 
+    * check_7mode_interfaces.pl
+      Checks Interface Group Status
+
 
 Examples
 --------
