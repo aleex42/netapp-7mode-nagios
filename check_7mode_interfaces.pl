@@ -59,12 +59,18 @@ foreach my $ifgrp (@ifgrps){
     my $ifgrp_name = $ifgrp->child_get_string("interface-name");
 
     my $link_list = $ifgrp->child_get("links");
-    my @links = $link_list->children_get();
 
-    foreach my $link (@links){
-        my $link_name = $link->get_content();
-        push(@{$ifgrp_links{$ifgrp_name}},$link_name);
-        push(@ifgrp_interfaces, $link_name);
+    if($link_list){
+
+        my @links = $link_list->children_get();
+
+        foreach my $link (@links){
+            my $link_name = $link->get_content();
+            unless(($link_name =~ /^lvif/) || ($link_name =~ /^svif/)){
+                push(@{$ifgrp_links{$ifgrp_name}},$link_name);
+                push(@ifgrp_interfaces, $link_name);
+            }
+        }
     }
 }
 
