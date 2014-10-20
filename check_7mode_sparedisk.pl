@@ -47,6 +47,7 @@ if ($output->results_errno != 0) {
     exit 3;
 }
 
+my $unowned = 0;
 my $normal = 0;
 my $notzero = 0;
 
@@ -69,9 +70,39 @@ foreach my $disk (@result){
     }
 }
 
+my $owned_output = $s->invoke("disk-sanown-list-info");
+
+if ($owned_output->results_errno != 0) {
+    my $r = $owned_output->results_reason();
+    print "UNKNOWN: $r\n";
+    exit 3;
+}
+
+my $owned = $owned_output->child_get("disk-sanown-details");
+my @owned_result = $owned->children_get();
+
+foreach my $owned_disk (@owned_result){
+
+    my $disk_name = $owned_disk->child_get_string("name");
+    my $disk_owner = $owned_disk->child_get_string("owner");
+
+    unless($disk_owner){
+        $unowned++;
+    }
+}
+
 if($notzero > 0){
-    print "WARNING: $notzero spares not zeroed - $normal normal spares\n";
-    exit 1;
+    if($unowned > 0){
+        print "CRITICAL: $unowned disks unowned - $notzero spares not zeroed\n";
+        exit 2;
+    } else {
+        print "WARNING: $notzero spares not zeroed - $normal normal spares\n";
+        exit 1;
+    }
+}
+elsif($unowned >0){
+    print "CRITICAL: $unowned disks unowned\n";
+    exit 2;
 } else {
     print "OK: $normal normal spares \n";
     exit 0;
