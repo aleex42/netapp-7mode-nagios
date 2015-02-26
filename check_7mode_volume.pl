@@ -62,21 +62,31 @@ my @result = $vols->children_get();
 
 foreach my $vol (@result){
 
-    my $inode_used = $vol->child_get_int("files-used");
-    my $inode_total = $vol->child_get_int("files-total");
-    my $inode_percent = sprintf("%.2f", $inode_used/$inode_total*100);
+    my $state = $vol->child_get_string("state");
 
-    my $used = $vol->child_get_int("percentage-used");
-
-    if(($used>=$Size_Critical) || ($inode_percent>=$Inode_Critical)){
-        print "CRITICAL: $Volume (Size: $used%, Inodes: $inode_percent%)\n";              
-         exit 2;
-    } elsif (($used>=$Size_Warning) || ($inode_percent>=$Inode_Warning)){
-        print "WARNING: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
+    if($state eq "restricted"){
+        print "Volume restricted";
+        exit 1;
+    } elsif ($state eq "offline"){
+        print "Volume offline";
         exit 1;
     } else {
-        print "OK: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
-        exit 0;
+        my $inode_used = $vol->child_get_int("files-used");
+        my $inode_total = $vol->child_get_int("files-total");
+        my $inode_percent = sprintf("%.2f", $inode_used/$inode_total*100);
+
+        my $used = $vol->child_get_int("percentage-used");
+
+        if(($used>=$Size_Critical) || ($inode_percent>=$Inode_Critical)){
+            print "CRITICAL: $Volume (Size: $used%, Inodes: $inode_percent%)\n";              
+            exit 2;
+        } elsif (($used>=$Size_Warning) || ($inode_percent>=$Inode_Warning)){
+            print "WARNING: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
+            exit 1;
+        } else {
+            print "OK: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
+            exit 0;
+        }
     }
 }
 
@@ -153,5 +163,5 @@ to see this Documentation
 =head1 AUTHORS
 
  Alexander Krogloth <git at krogloth.de>
-
+ Stephan Lang <stephan.lang at acp.at>
 
