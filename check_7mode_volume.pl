@@ -65,10 +65,10 @@ foreach my $vol (@result){
     my $state = $vol->child_get_string("state");
 
     if($state eq "restricted"){
-        print "Volume restricted";
+        print "WARNING: Volume '$Volume' restricted";
         exit 1;
     } elsif ($state eq "offline"){
-        print "Volume offline";
+        print "WARNING: Volume '$Volume' offline";
         exit 1;
     } else {
         my $inode_used = $vol->child_get_int("files-used");
