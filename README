@@ -11,8 +11,11 @@ Plugins
 
     Currently there are the following checks:
 
+    * check_7mode_aggr_reserve.pl
+      Checks Aggregate Reserved Space Usage
+
     * check_7mode_aggr_usage.pl
-      Checks Aggregate Space Usage
+      Checks Aggregate Real Space Usage
 
     * check_7mode_multipath.pl
       Checks Disk Multipathing
