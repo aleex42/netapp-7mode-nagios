@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # --
-# check_7mode_aggr_usage.pl - Check NetApp System Aggregate Space Usage (real allocated blocks including thick provisioned volumes)
+# check_7mode_aggr_usage.pl - Check NetApp System Aggregate Space Usage (default: allocated blocks including thick provisioned volumes)
 # Copyright (C) 2013 noris network AG, http://www.noris.net/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -23,6 +23,7 @@ GetOptions(
 	'password=s' => \my $Password,
 	'warning=i' => \my $Warning,
 	'critical=i' => \my $Critical,	
+    'real=s' => \my $real,
 	'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
 ) or Error("$0: Error in command line arguments\n");
 
@@ -60,12 +61,20 @@ my $message;
 
 foreach my $aggr (@result){
 
-    my $aggr_name = $aggr->child_get_string("aggregate-name");
-    my $aggr_alloc = $aggr->child_get_int("size-allocated");
-    my $aggr_free = $aggr->child_get_string("size-free");
-    my $aggr_used = $aggr->child_get_string("size-used");
+    my ($aggr_alloc, $aggr_used, $size);
 
-    my $size = $aggr_used+$aggr_free;
+    my $aggr_name = $aggr->child_get_string("aggregate-name");
+    my $aggr_free = $aggr->child_get_string("size-free");
+
+    if($real){
+        $aggr_alloc = $aggr->child_get_int("size-volume-allocated");
+        $aggr_used = $aggr->child_get_string("size-volume-used");
+        $size = $aggr_alloc+$aggr_free;
+    } else {
+        $aggr_alloc = $aggr->child_get_int("size-allocated");
+        $aggr_used = $aggr->child_get_string("size-used");
+        $size = $aggr_used+$aggr_free;
+    }
 
     my $percent = $aggr_used/$size*100;
     my $percent_rounded = sprintf("%.2f", $percent);
@@ -105,7 +114,7 @@ check_7mode_aggr_usage.pl - Nagios Plugin - Check NetApp 7-Mode Aggregate Space 
 =head1 SYNOPSIS
 
 check_7mode_aggr_usage.pl --hostname HOSTNAME --username USERNAME \
-           --password PASSWORD --warning WARNING --critical CRITICAL
+           --password PASSWORD --warning WARNING --critical CRITICAL [--real true]
 
 =head1 DESCRIPTION
 
@@ -134,6 +143,10 @@ The Warning Threshold for Aggregate Usage
 =item --critical CRITICAL
 
 The Critical Threshold for Aggregate Usage
+
+=item --real true
+
+Check the real used space if specified
 
 =item -help
 
