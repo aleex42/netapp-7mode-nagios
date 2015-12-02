@@ -37,14 +37,20 @@ my @sec_paths;
 my @broken_disk_paths;
 my @file;
 
-my $s = NaServer->new ($Hostname, 1, 3);
-
-$s->set_transport_type("HTTPS");
+my $s = NaServer->new ($Hostname, 1, 21);
+$s->set_server_type("FILER");
+#$s->set_transport_type("HTTPS");
+#$s->set_port(443);
 $s->set_style("LOGIN");
 $s->set_admin_user($Username, $Password);
-$s->set_timeout(60);
+#$s->set_timeout(60);
 
-my $output = $s->invoke("disk-list-info");
+my $api = new NaElement("disk-list-info");
+my $output = $s->invoke_elem($api);
+
+use Data::Dumper;
+print Dumper($output);
+die;
 
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # --
-# check_7mode_aggr_usage.pl - Check NetApp System Aggregate Space Usage (real allocated blocks)
+# check_7mode_aggr_usage.pl - Check NetApp System Aggregate Space Usage (real allocated blocks including thick provisioned volumes)
 # Copyright (C) 2013 noris network AG, http://www.noris.net/
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
@@ -61,11 +61,12 @@ my $message;
 foreach my $aggr (@result){
 
     my $aggr_name = $aggr->child_get_string("aggregate-name");
-    my $aggr_alloc = $aggr->child_get_int("size-volume-allocated");
+    my $aggr_alloc = $aggr->child_get_int("size-allocated");
     my $aggr_free = $aggr->child_get_string("size-free");
-    my $aggr_used = $aggr->child_get_string("size-volume-used");
+    my $aggr_used = $aggr->child_get_string("size-used");
 
-    my $size = $aggr_alloc+$aggr_free;
+    my $size = $aggr_used+$aggr_free;
+
     my $percent = $aggr_used/$size*100;
     my $percent_rounded = sprintf("%.2f", $percent);
 
