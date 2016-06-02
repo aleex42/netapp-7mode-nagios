@@ -40,9 +40,12 @@ my $old_snapshots;
 
 my $s = NaServer->new ($Hostname, 1, 3);
 
-$s->set_transport_type("HTTPS");
+$s->set_server_type("FILER");
+#$s->set_transport_type("HTTPS");
+#$s->set_port(443);
 $s->set_style("LOGIN");
 $s->set_admin_user($Username, $Password);
+#$s->set_timeout(60);
 
 my $vol_output = $s->invoke("volume-list-info");
 
@@ -115,7 +118,7 @@ foreach my $vol (@vol_result){
                 my $age = $now - $snap_time;
 
                 if($snap_name =~ m/^(hourly|nightly|weekly)\./){
-                    if($vol_name !~ m/^snapmirror/){
+                    if(($vol_name !~ m/^snapmirror/) || ($snap_name !~ m/^sv_/)){
                         if($age > $sched_maxtime){
                             $old++;
                             if($old_snapshots){
@@ -126,12 +129,14 @@ foreach my $vol (@vol_result){
                         }
                     }
                 } else {
-                    if($age >$maxtime){
-                        $old++;
-                        if($old_snapshots){
-                            $old_snapshots .= ", $vol_name/$snap_name";
-                        } else {
-                            $old_snapshots = "$vol_name/$snap_name";
+                    unless($snap_name =~ m/^sv_/){
+                        if($age >$maxtime){
+                            $old++;
+                            if($old_snapshots){
+                                $old_snapshots .= ", $vol_name/$snap_name";
+                            } else {
+                                $old_snapshots = "$vol_name/$snap_name";
+                            }
                         }
                     }
                 }
