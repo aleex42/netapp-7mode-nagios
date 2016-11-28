@@ -22,22 +22,22 @@ GetOptions(
     'username=s' => \my $Username,
     'password=s' => \my $Password,
     'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
-) or Error("$0: Error in command line arguments\n");
+) or Error( "$0: Error in command line arguments\n" );
 
 sub Error {
-    print "$0: " . $_[0] . "\n";
+    print "$0: ".$_[0]."\n";
     exit 2;
 }
-Error('Option --hostname needed!') unless $Hostname;
-Error('Option --username needed!') unless $Username;
-Error('Option --password needed!') unless $Password;
+Error( 'Option --hostname needed!' ) unless $Hostname;
+Error( 'Option --username needed!' ) unless $Username;
+Error( 'Option --password needed!' ) unless $Password;
 
 my $s = NaServer->new( $Hostname, 1, 3 );
-$s->set_transport_type("HTTPS");
-$s->set_style("LOGIN");
+$s->set_transport_type( "HTTPS" );
+$s->set_style( "LOGIN" );
 $s->set_admin_user( $Username, $Password );
 
-my $lif_output = $s->invoke('net-config-get-active');
+my $lif_output = $s->invoke( 'net-config-get-active' );
 
 if ($lif_output->results_errno != 0) {
     my $r = $lif_output->results_reason();
@@ -45,8 +45,8 @@ if ($lif_output->results_errno != 0) {
     exit 3;
 }
 
-my $net_config_info = $lif_output->child_get("net-config-info");
-my $ifgrp_list = $net_config_info->child_get("ifgrps");
+my $net_config_info = $lif_output->child_get( "net-config-info" );
+my $ifgrp_list = $net_config_info->child_get( "ifgrps" );
 
 my @ifgrps = $ifgrp_list->children_get();
 
@@ -54,48 +54,48 @@ my %ifgrp_links = ();
 my @ifgrp_interfaces;
 my @failed_interfaces;
 
-foreach my $ifgrp (@ifgrps){
+foreach my $ifgrp (@ifgrps) {
 
-    my $ifgrp_name = $ifgrp->child_get_string("interface-name");
+    my $ifgrp_name = $ifgrp->child_get_string( "interface-name" );
 
-    my $link_list = $ifgrp->child_get("links");
+    my $link_list = $ifgrp->child_get( "links" );
 
-    if($link_list){
+    if ($link_list) {
 
         my @links = $link_list->children_get();
 
-        foreach my $link (@links){
+        foreach my $link (@links) {
             my $link_name = $link->get_content();
-            unless(($link_name =~ /^lvif/) || ($link_name =~ /^svif/)){
-                push(@{$ifgrp_links{$ifgrp_name}},$link_name);
-                push(@ifgrp_interfaces, $link_name);
+            unless (($link_name =~ /^lvif/) || ($link_name =~ /^svif/)) {
+                push( @{$ifgrp_links{$ifgrp_name}}, $link_name );
+                push( @ifgrp_interfaces, $link_name );
             }
         }
     }
 }
 
-my $interface_list = $net_config_info->child_get("interfaces");
+my $interface_list = $net_config_info->child_get( "interfaces" );
 my @interfaces = $interface_list->children_get();
 
-foreach my $int (@interfaces){
-    
-    my $name = $int->child_get_string("interface-name");
-    my $state =$int->child_get_string("mediatype");
+foreach my $int (@interfaces) {
 
-    if(grep(/$name/, @ifgrp_interfaces)){
-        my $state =$int->child_get_string("mediatype");
+    my $name = $int->child_get_string( "interface-name" );
+    my $state = $int->child_get_string( "mediatype" );
 
-        unless($state =~ /-up$/){
-            push(@failed_interfaces, $name);
+    if (grep(/$name/, @ifgrp_interfaces)) {
+        my $state = $int->child_get_string( "mediatype" );
+
+        unless ($state =~ /-up$/) {
+            push( @failed_interfaces, $name );
         }
     }
 }
 
 my $failed_count = @failed_interfaces;
 
-if($failed_count != 0){
+if ($failed_count != 0) {
     print "CRITICAL: ";
-    foreach (@failed_interfaces){
+    foreach (@failed_interfaces) {
         print "$_ down, ";
     }
     print "\n";

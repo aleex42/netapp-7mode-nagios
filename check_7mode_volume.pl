@@ -18,38 +18,38 @@ use NaElement;
 use Getopt::Long;
 
 GetOptions(
-	'hostname=s' => \my $Hostname,
-	'username=s' => \my $Username,
-	'password=s' => \my $Password,
-    'volume=s' => \my $Volume,
-	'size-warning=i' => \my $Size_Warning,
-	'size-critical=i' => \my $Size_Critical,	
-    'inode-warning=i' => \my $Inode_Warning,
+    'hostname=s'       => \my $Hostname,
+    'username=s'       => \my $Username,
+    'password=s'       => \my $Password,
+    'volume=s'         => \my $Volume,
+    'size-warning=i'   => \my $Size_Warning,
+    'size-critical=i'  => \my $Size_Critical,
+    'inode-warning=i'  => \my $Inode_Warning,
     'inode-critical=i' => \my $Inode_Critical,
-	'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
-) or Error("$0: Error in command line arguments\n");
+    'help|?'           => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
+) or Error( "$0: Error in command line arguments\n" );
 
 sub Error {
-    print "$0: " . shift;
+    print "$0: ".shift;
     exit 2;
 }
-Error('Option --hostname needed!') unless $Hostname;
-Error('Option --username needed!') unless $Username;
-Error('Option --password needed!') unless $Password;
-Error('Option --volume needed!') unless $Volume;
-Error('Option --size-warning needed!') unless $Size_Warning;
-Error('Option ---size-critical needed!') unless $Size_Critical;
-Error('Option --inode-warning needed!') unless $Inode_Warning;
-Error('Option ---inode-critical needed!') unless $Inode_Critical;
+Error( 'Option --hostname needed!' ) unless $Hostname;
+Error( 'Option --username needed!' ) unless $Username;
+Error( 'Option --password needed!' ) unless $Password;
+Error( 'Option --volume needed!' ) unless $Volume;
+Error( 'Option --size-warning needed!' ) unless $Size_Warning;
+Error( 'Option ---size-critical needed!' ) unless $Size_Critical;
+Error( 'Option --inode-warning needed!' ) unless $Inode_Warning;
+Error( 'Option ---inode-critical needed!' ) unless $Inode_Critical;
 
-my $s = NaServer->new ($Hostname, 1, 3);
+my $s = NaServer->new ( $Hostname, 1, 3 );
 
-$s->set_transport_type("HTTPS");
-$s->set_style("LOGIN");
-$s->set_admin_user($Username, $Password);
-$s->set_timeout(60);
+$s->set_transport_type( "HTTPS" );
+$s->set_style( "LOGIN" );
+$s->set_admin_user( $Username, $Password );
+$s->set_timeout( 60 );
 
-my $output = $s->invoke("volume-list-info", "volume", $Volume);
+my $output = $s->invoke( "volume-list-info", "volume", $Volume );
 
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();
@@ -57,30 +57,30 @@ if ($output->results_errno != 0) {
     exit 3;
 }
 
-my $vols = $output->child_get("volumes");
+my $vols = $output->child_get( "volumes" );
 my @result = $vols->children_get();
 
-foreach my $vol (@result){
+foreach my $vol (@result) {
 
-    my $state = $vol->child_get_string("state");
+    my $state = $vol->child_get_string( "state" );
 
-    if($state eq "restricted"){
+    if ($state eq "restricted") {
         print "WARNING: Volume '$Volume' restricted";
         exit 1;
-    } elsif ($state eq "offline"){
+    } elsif ($state eq "offline") {
         print "WARNING: Volume '$Volume' offline";
         exit 1;
     } else {
-        my $inode_used = $vol->child_get_int("files-used");
-        my $inode_total = $vol->child_get_int("files-total");
-        my $inode_percent = sprintf("%.2f", $inode_used/$inode_total*100);
+        my $inode_used = $vol->child_get_int( "files-used" );
+        my $inode_total = $vol->child_get_int( "files-total" );
+        my $inode_percent = sprintf( "%.2f", $inode_used / $inode_total * 100 );
 
-        my $used = $vol->child_get_int("percentage-used");
+        my $used = $vol->child_get_int( "percentage-used" );
 
-        if(($used>=$Size_Critical) || ($inode_percent>=$Inode_Critical)){
-            print "CRITICAL: $Volume (Size: $used%, Inodes: $inode_percent%)\n";              
+        if (($used >= $Size_Critical) || ($inode_percent >= $Inode_Critical)) {
+            print "CRITICAL: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
             exit 2;
-        } elsif (($used>=$Size_Warning) || ($inode_percent>=$Inode_Warning)){
+        } elsif (($used >= $Size_Warning) || ($inode_percent >= $Inode_Warning)) {
             print "WARNING: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
             exit 1;
         } else {
@@ -97,13 +97,14 @@ __END__
 
 =head1 NAME
 
-check_7mode_vol_usage.pl - Nagios Plugin - Check NetApp 7-Mode Volume Usage
+check_7mode_volume.pl - Nagios Plugin - Check NetApp 7-Mode Volume Usage
 
 =head1 SYNOPSIS
 
-check_7mode_aggr_usage.pl --hostname HOSTNAME --username USERNAME \
-           --password PASSWORD --size-warning WARNING --size-critical CRITICAL --volume VOLUME \
-           --inode-warning WARNING --inode-critical WARNING
+check_7mode_volume.pl --hostname HOSTNAME --username USERNAME \
+           --password PASSWORD --size-warning WARNING --size-critical CRITICAL \
+           --inode-warning WARNING --inode-critical WARNING \
+           --volume VOLUME
 
 =head1 DESCRIPTION
 

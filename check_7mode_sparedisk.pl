@@ -22,24 +22,24 @@ GetOptions(
     'username=s' => \my $Username,
     'password=s' => \my $Password,
     'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
-) or Error("$0: Error in command line arguments\n");
+) or Error( "$0: Error in command line arguments\n" );
 
 sub Error {
-    print "$0: " . shift;
+    print "$0: ".shift;
     exit 2;
 }
-Error('Option --hostname needed!') unless $Hostname;
-Error('Option --username needed!') unless $Username;
-Error('Option --password needed!') unless $Password;
+Error( 'Option --hostname needed!' ) unless $Hostname;
+Error( 'Option --username needed!' ) unless $Username;
+Error( 'Option --password needed!' ) unless $Password;
 
-my $s = NaServer->new ($Hostname, 1, 3);
+my $s = NaServer->new ( $Hostname, 1, 3 );
 
-$s->set_transport_type("HTTPS");
-$s->set_style("LOGIN");
-$s->set_admin_user($Username, $Password);
-$s->set_timeout(60);
+$s->set_transport_type( "HTTPS" );
+$s->set_style( "LOGIN" );
+$s->set_admin_user( $Username, $Password );
+$s->set_timeout( 60 );
 
-my $output = $s->invoke("disk-list-info");
+my $output = $s->invoke( "disk-list-info" );
 
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();
@@ -51,18 +51,18 @@ my $unowned = 0;
 my $normal = 0;
 my $notzero = 0;
 
-my $disks = $output->child_get("disk-details");
+my $disks = $output->child_get( "disk-details" );
 my @result = $disks->children_get();
 
-foreach my $disk (@result){
+foreach my $disk (@result) {
 
-    my $disk_state = $disk->child_get_string("raid-state");
+    my $disk_state = $disk->child_get_string( "raid-state" );
 
-    if($disk_state eq "spare"){
+    if ($disk_state eq "spare") {
 
-        my $zero_state = $disk->child_get_string("is-zeroed");
+        my $zero_state = $disk->child_get_string( "is-zeroed" );
 
-        if($zero_state eq "false"){
+        if ($zero_state eq "false") {
             $notzero++;
         } else {
             $normal++;
@@ -70,7 +70,7 @@ foreach my $disk (@result){
     }
 }
 
-my $owned_output = $s->invoke("disk-sanown-list-info");
+my $owned_output = $s->invoke( "disk-sanown-list-info" );
 
 if ($owned_output->results_errno != 0) {
     my $r = $owned_output->results_reason();
@@ -78,21 +78,21 @@ if ($owned_output->results_errno != 0) {
     exit 3;
 }
 
-my $owned = $owned_output->child_get("disk-sanown-details");
+my $owned = $owned_output->child_get( "disk-sanown-details" );
 my @owned_result = $owned->children_get();
 
-foreach my $owned_disk (@owned_result){
+foreach my $owned_disk (@owned_result) {
 
-    my $disk_name = $owned_disk->child_get_string("name");
-    my $disk_owner = $owned_disk->child_get_string("owner");
+    my $disk_name = $owned_disk->child_get_string( "name" );
+    my $disk_owner = $owned_disk->child_get_string( "owner" );
 
-    unless($disk_owner){
+    unless ($disk_owner) {
         $unowned++;
     }
 }
 
-if($notzero > 0){
-    if($unowned > 0){
+if ($notzero > 0) {
+    if ($unowned > 0) {
         print "CRITICAL: $unowned disks unowned - $notzero spares not zeroed\n";
         exit 2;
     } else {
@@ -100,7 +100,7 @@ if($notzero > 0){
         exit 1;
     }
 }
-elsif($unowned >0){
+elsif ($unowned > 0) {
     print "CRITICAL: $unowned disks unowned\n";
     exit 2;
 } else {

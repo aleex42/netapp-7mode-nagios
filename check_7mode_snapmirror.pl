@@ -23,27 +23,27 @@ GetOptions(
     'password=s' => \my $Password,
     'lag=i'      => \my $LagOpt,
     'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
-) or Error("$0: Error in command line arguments\n");
+) or Error( "$0: Error in command line arguments\n" );
 
 sub Error {
-    print "$0: " . shift;
+    print "$0: ".shift;
     exit 2;
 }
-Error('Option --hostname needed!') unless $Hostname;
-Error('Option --username needed!') unless $Username;
-Error('Option --password needed!') unless $Password;
+Error( 'Option --hostname needed!' ) unless $Hostname;
+Error( 'Option --username needed!' ) unless $Username;
+Error( 'Option --password needed!' ) unless $Password;
 $LagOpt = 3600 * 28 unless $LagOpt; # 1 day 3 hours
 
 my $old = 0;
 my $old_snapmirrors;
 
-my $s = NaServer->new ($Hostname, 1, 3);
+my $s = NaServer->new ( $Hostname, 1, 3 );
 
-$s->set_transport_type("HTTPS");
-$s->set_style("LOGIN");
-$s->set_admin_user($Username, $Password);
+$s->set_transport_type( "HTTPS" );
+$s->set_style( "LOGIN" );
+$s->set_admin_user( $Username, $Password );
 
-my $snapmirror_output = $s->invoke("snapmirror-get-status");
+my $snapmirror_output = $s->invoke( "snapmirror-get-status" );
 
 if ($snapmirror_output->results_errno != 0) {
     my $r = $snapmirror_output->results_reason();
@@ -51,19 +51,19 @@ if ($snapmirror_output->results_errno != 0) {
     exit 3;
 }
 
-my $snapmirror = $snapmirror_output->child_get("snapmirror-status");
-if($snapmirror){
+my $snapmirror = $snapmirror_output->child_get( "snapmirror-status" );
+if ($snapmirror) {
 
     my @snapmirror_result = $snapmirror->children_get();
 
-    foreach my $sm (@snapmirror_result){
+    foreach my $sm (@snapmirror_result) {
 
-        my $dest_name = $sm->child_get_string("destination-location");
-        my $lag = $sm->child_get_int("lag-time");
+        my $dest_name = $sm->child_get_string( "destination-location" );
+        my $lag = $sm->child_get_int( "lag-time" );
 
-        if($lag >= $LagOpt){
+        if ($lag >= $LagOpt) {
             $old++;
-            if($old_snapmirrors){
+            if ($old_snapmirrors) {
                 $old_snapmirrors .= ", $dest_name";
             } else {
                 $old_snapmirrors = "$dest_name";
@@ -72,7 +72,7 @@ if($snapmirror){
     }
 }
 
-if($old ne "0"){
+if ($old ne "0") {
     print "$old old snapsmirror(s) older than 1 day:\n";
     print "$old_snapmirrors\n";
     exit 2;
@@ -91,7 +91,7 @@ check_7mode_snapmirror.pl - Nagios Plugin - Check NetApp 7-Mode SnapMirror Age
 
 =head1 SYNOPSIS
 
-check_7mode_snapshot_age.pl --hostname HOSTNAME --username USERNAME \
+check_7mode_snapmirror.pl --hostname HOSTNAME --username USERNAME \
            --password PASSWORD
 
 =head1 DESCRIPTION
