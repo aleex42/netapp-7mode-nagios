@@ -78,13 +78,13 @@ foreach my $vol (@result) {
         my $used = $vol->child_get_int( "percentage-used" );
 
         if (($used >= $Size_Critical) || ($inode_percent >= $Inode_Critical)) {
-            print "CRITICAL: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
+            print "CRITICAL: $Volume (Size: $used%, Inodes: $inode_percent%) | size=$used%;$Size_Warning;$Size_Critical inode=$inode_percent%;$Inode_Warning;$Inode_Critical\n";
             exit 2;
         } elsif (($used >= $Size_Warning) || ($inode_percent >= $Inode_Warning)) {
-            print "WARNING: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
+            print "WARNING: $Volume (Size: $used%, Inodes: $inode_percent%) | size=$used%;$Size_Warning;$Size_Critical inode=$inode_percent%;$Inode_Warning;$Inode_Critical\n";
             exit 1;
         } else {
-            print "OK: $Volume (Size: $used%, Inodes: $inode_percent%)\n";
+            print "OK: $Volume (Size: $used%, Inodes: $inode_percent%) | size=$used%;$Size_Warning;$Size_Critical inode=$inode_percent%;$Inode_Warning;$Inode_Critical\n";
             exit 0;
         }
     }
