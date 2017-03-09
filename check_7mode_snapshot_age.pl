@@ -22,32 +22,32 @@ GetOptions(
     'username=s' => \my $Username,
     'password=s' => \my $Password,
     'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
-) or Error("$0: Error in command line arguments\n");
+) or Error( "$0: Error in command line arguments\n" );
 
 sub Error {
-    print "$0: " . shift;
+    print "$0: ".shift;
     exit 2;
 }
-Error('Option --hostname needed!') unless $Hostname;
-Error('Option --username needed!') unless $Username;
-Error('Option --password needed!') unless $Password;
+Error( 'Option --hostname needed!' ) unless $Hostname;
+Error( 'Option --username needed!' ) unless $Username;
+Error( 'Option --password needed!' ) unless $Password;
 
-my $maxtime = 90*24*3600; # 7776000 (90 days)
+my $maxtime = 90 * 24 * 3600; # 7776000 (90 days)
 my $sched_maxtime;
 my $now = time;
 my $old = 0;
 my $old_snapshots;
 
-my $s = NaServer->new ($Hostname, 1, 3);
+my $s = NaServer->new ( $Hostname, 1, 3 );
 
-$s->set_server_type("FILER");
+$s->set_server_type( "FILER" );
 #$s->set_transport_type("HTTPS");
 #$s->set_port(443);
-$s->set_style("LOGIN");
-$s->set_admin_user($Username, $Password);
+$s->set_style( "LOGIN" );
+$s->set_admin_user( $Username, $Password );
 #$s->set_timeout(60);
 
-my $vol_output = $s->invoke("volume-list-info");
+my $vol_output = $s->invoke( "volume-list-info" );
 
 if ($vol_output->results_errno != 0) {
     my $r = $vol_output->results_reason();
@@ -55,19 +55,19 @@ if ($vol_output->results_errno != 0) {
     exit 3;
 }
 
-my $volumes = $vol_output->child_get("volumes");
+my $volumes = $vol_output->child_get( "volumes" );
 my @vol_result = $volumes->children_get();
 
-foreach my $vol (@vol_result){
+foreach my $vol (@vol_result) {
 
-    my $vol_name = $vol->child_get_string("name");
-    my $vol_state = $vol->child_get_string("state");
+    my $vol_name = $vol->child_get_string( "name" );
+    my $vol_state = $vol->child_get_string( "state" );
 
-    unless(($vol_state eq "offline") || ($vol_state eq "unknown")){
+    unless (($vol_state eq "offline") || ($vol_state eq "unknown")) {
 
-        my $sched_api = new NaElement('snapshot-get-schedule');
-        $sched_api->child_add_string('volume',$vol_name);
-        my $sched_output = $s->invoke_elem($sched_api);
+        my $sched_api = new NaElement( 'snapshot-get-schedule' );
+        $sched_api->child_add_string( 'volume', $vol_name );
+        my $sched_output = $s->invoke_elem( $sched_api );
 
         if ($sched_output->results_errno != 0) {
             my $r = $sched_output->results_reason();
@@ -78,26 +78,26 @@ foreach my $vol (@vol_result){
         my $nightly_sched;
         my $weekly_sched;
 
-        if($sched_output->child_get_string("days") && $sched_output->child_get_string("weeks")){
+        if ($sched_output->child_get_string( "days" ) && $sched_output->child_get_string( "weeks" )) {
 
-            $nightly_sched = $sched_output->child_get_string("days");
-            $weekly_sched = $sched_output->child_get_string("weeks");
+            $nightly_sched = $sched_output->child_get_string( "days" );
+            $weekly_sched = $sched_output->child_get_string( "weeks" );
 
             # +172800 (2 days) because the snapshot isn't deleted instant
-            if($nightly_sched != 0){
-                $sched_maxtime = ($nightly_sched*24*3600)+172800;
+            if ($nightly_sched != 0) {
+                $sched_maxtime = ($nightly_sched * 24 * 3600) + 172800;
             }
-            if($weekly_sched != 0){
-                $sched_maxtime = ($weekly_sched*7*24*3600)+172800;
+            if ($weekly_sched != 0) {
+                $sched_maxtime = ($weekly_sched * 7 * 24 * 3600) + 172800;
             }
 
         } else {
             $sched_maxtime = $maxtime;
         }
 
-        my $api = new NaElement('snapshot-list-info');
-        $api->child_add_string('volume',$vol_name);
-        my $snapshot_output = $s->invoke_elem($api);
+        my $api = new NaElement( 'snapshot-list-info' );
+        $api->child_add_string( 'volume', $vol_name );
+        my $snapshot_output = $s->invoke_elem( $api );
 
         if ($snapshot_output->results_errno != 0) {
             my $r = $snapshot_output->results_reason();
@@ -105,23 +105,23 @@ foreach my $vol (@vol_result){
             exit 3;
         }
 
-        my $snapshots = $snapshot_output->child_get("snapshots");
+        my $snapshots = $snapshot_output->child_get( "snapshots" );
 
-        if($snapshots){
+        if ($snapshots) {
 
             my @snap_result = $snapshots->children_get();
 
-            foreach my $snapshot (@snap_result){
+            foreach my $snapshot (@snap_result) {
 
-                my $snap_name = $snapshot->child_get_string("name");
-                my $snap_time = $snapshot->child_get_string("access-time");
+                my $snap_name = $snapshot->child_get_string( "name" );
+                my $snap_time = $snapshot->child_get_string( "access-time" );
                 my $age = $now - $snap_time;
 
-                if($snap_name =~ m/^(hourly|nightly|weekly)\./){
-                    if(($vol_name !~ m/^snapmirror/) || ($snap_name !~ m/^sv_/)){
-                        if($age > $sched_maxtime){
+                if ($snap_name =~ m/^(hourly|nightly|weekly)\./) {
+                    if (($vol_name !~ m/^snapmirror/) || ($snap_name !~ m/^sv_/)) {
+                        if ($age > $sched_maxtime) {
                             $old++;
-                            if($old_snapshots){
+                            if ($old_snapshots) {
                                 $old_snapshots .= ", $vol_name/$snap_name (Age: $age)";
                             } else {
                                 $old_snapshots = "$vol_name/$snap_name (Age: $age)";
@@ -129,10 +129,10 @@ foreach my $vol (@vol_result){
                         }
                     }
                 } else {
-                    unless($snap_name =~ m/^sv_/){
-                        if($age >$maxtime){
+                    unless ($snap_name =~ m/^sv_/) {
+                        if ($age > $maxtime) {
                             $old++;
-                            if($old_snapshots){
+                            if ($old_snapshots) {
                                 $old_snapshots .= ", $vol_name/$snap_name";
                             } else {
                                 $old_snapshots = "$vol_name/$snap_name";
@@ -145,7 +145,7 @@ foreach my $vol (@vol_result){
     }
 }
 
-if($old ne "0"){
+if ($old ne "0") {
     print "$old dead snapshot(s) older than scheduled:\n";
     print "$old_snapshots\n";
     exit 1;

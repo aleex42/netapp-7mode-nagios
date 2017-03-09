@@ -21,27 +21,27 @@ GetOptions(
     'hostname=s' => \my $Hostname,
     'username=s' => \my $Username,
     'password=s' => \my $Password,
-    'diff=i' => \my $Diff,
+    'diff=i'     => \my $Diff,
     'help|?'     => sub { exec perldoc => -F => $0 or die "Cannot execute perldoc: $!\n"; },
-) or Error("$0: Error in command line arguments\n");
+) or Error( "$0: Error in command line arguments\n" );
 
 sub Error {
-    print "$0: " . shift;
+    print "$0: ".shift;
     exit 2;
 }
-Error('Option --hostname needed!') unless $Hostname;
-Error('Option --username needed!') unless $Username;
-Error('Option --password needed!') unless $Password;
-Error('Option --diff needed!') unless $Diff;
+Error( 'Option --hostname needed!' ) unless $Hostname;
+Error( 'Option --username needed!' ) unless $Username;
+Error( 'Option --password needed!' ) unless $Password;
+Error( 'Option --diff needed!' ) unless $Diff;
 
-my $s = NaServer->new ($Hostname, 1, 3);
+my $s = NaServer->new ( $Hostname, 1, 3 );
 
-$s->set_transport_type("HTTPS");
-$s->set_style("LOGIN");
-$s->set_admin_user($Username, $Password);
-$s->set_timeout(60);
+$s->set_transport_type( "HTTPS" );
+$s->set_style( "LOGIN" );
+$s->set_admin_user( $Username, $Password );
+$s->set_timeout( 60 );
 
-my $output = $s->invoke("clock-get-clock");
+my $output = $s->invoke( "clock-get-clock" );
 
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();
@@ -49,13 +49,13 @@ if ($output->results_errno != 0) {
     exit 3;
 }
 
-my $time_netapp = $output->child_get_string("local-time");
+my $time_netapp = $output->child_get_string( "local-time" );
 
 my $time_now = time();
 
-my $ntp_diff = $time_now-$time_netapp;
+my $ntp_diff = $time_now - $time_netapp;
 
-if($ntp_diff >= $Diff){
+if ($ntp_diff >= $Diff) {
     print "NetApp time is $ntp_diff seconds different - check NTP";
     exit 2;
 } else {
