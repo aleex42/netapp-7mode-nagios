@@ -86,3 +86,57 @@ if (!%busy_snapshots){
         }
     exit(1);
 }
+
+__END__
+
+=head1 NAME
+
+check_7mode_snapshot_state.pl - Nagios Plugin - Check NetApp 7-Mode Snapshot Status
+
+=head1 SYNOPSIS
+
+check_7mode_snapshot_state.pl --hostname HOSTNAME --username USERNAME --password PASSWORD [--volume VOLUME]
+
+=head1 DESCRIPTION
+
+Checks if there are any snapshot in busy state
+
+=head1 OPTIONS
+
+=over 4
+
+=item --hostname FQDN
+
+The Hostname of the NetApp 7-Mode filer to collect the data
+
+=item --username USERNAME
+
+The Login Username of the monitoring-User
+
+=item --password PASSWORD
+
+The Login Password of the monitoring-User
+
+=item --volume VOLUME
+
+(OPTIONAL) The Volume name to be checked
+
+=item -help
+
+=item -?
+
+to see this Documentation
+
+=back
+
+=head1 EXIT CODE
+
+3 if timeout occured
+1 if there are any snapshots older than 90 days
+0 if everything is ok
+
+=head1 AUTHORS
+
+ Alexander Krogloth <git at krogloth.de>
+
+
