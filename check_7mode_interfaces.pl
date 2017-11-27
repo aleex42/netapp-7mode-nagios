@@ -39,6 +39,11 @@ $s->set_admin_user( $Username, $Password );
 
 my $lif_output = $s->invoke( 'net-config-get-active' );
 
+if(ref ($lif_output) eq "NaElement" && $lif_output->results_errno != 0){
+    $s->set_transport_type( "HTTP" );
+    $lif_output = $s->invoke( "net-config-get-active" );
+}
+
 if ($lif_output->results_errno != 0) {
     my $r = $lif_output->results_reason();
     print "UNKNOWN: $r\n";

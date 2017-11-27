@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use Data::Dumper;
+
 # --
 # check_7mode_ntp.pl - Check NetApp System NTP time
 # Copyright (C) 2013 noris network AG, http://www.noris.net/
@@ -36,12 +38,17 @@ Error( 'Option --diff needed!' ) unless $Diff;
 
 my $s = NaServer->new ( $Hostname, 1, 3 );
 
-$s->set_transport_type( "HTTPS" );
+my $out = $s->set_transport_type( "HTTPS" );
 $s->set_style( "LOGIN" );
 $s->set_admin_user( $Username, $Password );
 $s->set_timeout( 60 );
 
-my $output = $s->invoke( "clock-get-clock" );
+my $output = $s->invoke("clock-get-clock");
+
+if(ref ($output) eq "NaElement" && $output->results_errno != 0){
+    $s->set_transport_type('HTTP');
+    $output = $s->invoke( "clock-get-clock" );
+} 
 
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();
@@ -56,10 +63,10 @@ my $time_now = time();
 my $ntp_diff = $time_now - $time_netapp;
 
 if ($ntp_diff >= $Diff) {
-    print "NetApp time is $ntp_diff seconds different - check NTP";
+    print "NetApp time is $ntp_diff seconds different - check NTP\n";
     exit 2;
 } else {
-    print "NetApp time is OK";
+    print "NetApp time is OK\n";
     exit 0;
 }
 

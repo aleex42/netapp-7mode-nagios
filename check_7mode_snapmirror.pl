@@ -45,6 +45,11 @@ $s->set_admin_user( $Username, $Password );
 
 my $snapmirror_output = $s->invoke( "snapmirror-get-status" );
 
+if(ref ($snapmirror_output) eq "NaElement" && $snapmirror_output->results_errno != 0){
+    $s->set_transport_type( "HTTP" );
+    $snapmirror_output = $s->invoke( "snapmirror-get-status" );
+}
+
 if ($snapmirror_output->results_errno != 0) {
     my $r = $snapmirror_output->results_reason();
     print "UNKNOWN: $r\n";

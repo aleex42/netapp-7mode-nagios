@@ -51,6 +51,11 @@ $s->set_timeout( 60 );
 
 my $output = $s->invoke( "volume-list-info", "volume", $Volume );
 
+if(ref ($output) eq "NaElement" && $output->results_errno != 0){
+    $s->set_transport_type( "HTTP" );
+    $output = $s->invoke( "volume-list-info" );
+}
+
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();
     print "UNKNOWN: $r\n";

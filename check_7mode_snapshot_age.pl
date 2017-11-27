@@ -38,16 +38,17 @@ my $now = time;
 my $old = 0;
 my $old_snapshots;
 
-my $s = NaServer->new ( $Hostname, 1, 3 );
-
-$s->set_server_type( "FILER" );
-#$s->set_transport_type("HTTPS");
-#$s->set_port(443);
+my $s = NaServer->new( $Hostname, 1, 3 );
+$s->set_transport_type( "HTTPS" );
 $s->set_style( "LOGIN" );
 $s->set_admin_user( $Username, $Password );
-#$s->set_timeout(60);
 
 my $vol_output = $s->invoke( "volume-list-info" );
+
+if(ref ($vol_output) eq "NaElement" && $vol_output->results_errno != 0){
+    $s->set_transport_type( "HTTP" );
+    $vol_output = $s->invoke( "volume-list-info" );
+}
 
 if ($vol_output->results_errno != 0) {
     my $r = $vol_output->results_reason();

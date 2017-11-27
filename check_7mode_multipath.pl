@@ -48,6 +48,11 @@ $s->set_admin_user( $Username, $Password );
 my $api = new NaElement( "disk-list-info" );
 my $output = $s->invoke_elem( $api );
 
+if(ref ($output) eq "NaElement" && $output->results_errno != 0){
+    $s->set_transport_type( "HTTP" );
+    $output = $s->invoke( "disk-list-info" );
+}
+
 if ($output->results_errno != 0) {
     my $r = $output->results_reason();
     print "UNKNOWN: $r\n";
